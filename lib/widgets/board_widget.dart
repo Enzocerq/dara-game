@@ -102,9 +102,15 @@ class BoardWidget extends StatelessWidget {
       borderWidth = 1;
     }
 
-    return GestureDetector(
-      onTap: () => onCellTap(row, col),
-      child: AnimatedContainer(
+    return MouseRegion(
+      cursor: cellValue != 0
+          ? SystemMouseCursors.click
+          : isValidTarget
+              ? SystemMouseCursors.click
+              : SystemMouseCursors.basic,
+      child: GestureDetector(
+        onTap: () => onCellTap(row, col),
+        child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
           color: bgColor,
@@ -147,6 +153,7 @@ class BoardWidget extends StatelessWidget {
                   ),
                 ),
         ),
+      ),
       ),
     );
   }
