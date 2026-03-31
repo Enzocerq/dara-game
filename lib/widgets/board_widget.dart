@@ -37,7 +37,7 @@ class BoardWidget extends StatelessWidget {
           border: Border.all(color: Colors.brown.shade400, width: 3),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.4),
+              color: Colors.black.withValues(alpha: 0.4),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -85,15 +85,15 @@ class BoardWidget extends StatelessWidget {
     double borderWidth;
 
     if (isSelected) {
-      bgColor = Colors.yellow.withOpacity(0.3);
+      bgColor = Colors.yellow.withValues(alpha: 0.3);
       borderColor = Colors.yellow;
       borderWidth = 2.5;
     } else if (isValidTarget) {
-      bgColor = Colors.green.withOpacity(0.25);
+      bgColor = Colors.green.withValues(alpha: 0.25);
       borderColor = Colors.greenAccent;
       borderWidth = 2;
     } else if (isCapturable) {
-      bgColor = Colors.red.withOpacity(0.25);
+      bgColor = Colors.red.withValues(alpha: 0.25);
       borderColor = Colors.redAccent;
       borderWidth = 2;
     } else {
@@ -124,7 +124,7 @@ class BoardWidget extends StatelessWidget {
                           : Colors.red.shade400,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.4),
+                          color: Colors.black.withValues(alpha: 0.4),
                           blurRadius: 3,
                           offset: const Offset(1, 2),
                         ),
@@ -143,7 +143,7 @@ class BoardWidget extends StatelessWidget {
                   height: 6,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.brown.shade400.withOpacity(0.5),
+                    color: Colors.brown.shade400.withValues(alpha: 0.5),
                   ),
                 ),
         ),

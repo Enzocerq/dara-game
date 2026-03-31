@@ -109,7 +109,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.brown.shade900.withOpacity(0.5),
+                  color: Colors.brown.shade900.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text(
