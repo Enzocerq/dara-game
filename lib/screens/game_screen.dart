@@ -49,6 +49,9 @@ class _GameScreenState extends State<GameScreen> {
   bool _opponentWantsRematch = false;
   void Function(void Function())? _dialogSetState;
 
+  /// Inicializa o estado do jogo ao entrar na tela.
+  /// Define o tabuleiro vazio, identifica qual jogador é o local (host = 1,
+  /// cliente = 2), configura os callbacks do socket e inicia a escuta.
   @override
   void initState() {
     super.initState();
@@ -82,6 +85,9 @@ class _GameScreenState extends State<GameScreen> {
   // PROCESSAMENTO DE MENSAGENS RECEBIDAS
   // ============================================================
 
+  /// Processa cada mensagem JSON recebida pelo socket do oponente.
+  /// Atualiza o estado local do tabuleiro e avança a fase do jogo conforme
+  /// o tipo da mensagem recebida.
   void _handleIncomingMessage(Map<String, dynamic> msg) {
     setState(() {
       switch (msg['type']) {
@@ -163,6 +169,8 @@ class _GameScreenState extends State<GameScreen> {
   // LÓGICA DO JOGO
   // ============================================================
 
+  /// Passa o turno para o outro jogador. Se ambos já colocaram todas as peças,
+  /// avança da fase de colocação para a fase de movimento.
   void _advanceTurn() {
     currentTurn = currentTurn == 1 ? 2 : 1;
 
@@ -175,6 +183,8 @@ class _GameScreenState extends State<GameScreen> {
     _refreshStatusMessage();
   }
 
+  /// Atualiza a mensagem de status exibida na InfoBar de acordo com a fase
+  /// atual do jogo e de quem é o turno.
   void _refreshStatusMessage() {
     statusIsError = false;
     if (phase == GamePhase.gameOver) return;
@@ -206,6 +216,8 @@ class _GameScreenState extends State<GameScreen> {
     }
   }
 
+  /// Verifica, sem alterar o estado real, se colocar uma peça do [player]
+  /// em (row, col) formaria um alinhamento de 3 ou mais.
   bool _wouldFormLine(int row, int col, int player) {
     board[row][col] = player;
     bool result = _isPartOfLine(row, col, player);
@@ -235,16 +247,21 @@ class _GameScreenState extends State<GameScreen> {
     return hCount > vCount ? hCount : vCount;
   }
 
+  /// Retorna true se a peça em (row, col) faz parte de um alinhamento
+  /// de 3 ou mais peças do [player] (horizontal ou vertical).
   bool _isPartOfLine(int row, int col, int player) {
     return _maxLineLength(row, col, player) >= 3;
   }
 
+  /// Retorna true se as células (fromRow, fromCol) e (toRow, toCol) são
+  /// adjacentes ortogonalmente (cima, baixo, esquerda, direita).
   bool _isAdjacent(int fromRow, int fromCol, int toRow, int toCol) {
     int dr = (fromRow - toRow).abs();
     int dc = (fromCol - toCol).abs();
     return (dr + dc) == 1;
   }
 
+  /// Conta e retorna o total de peças do [player] presentes no tabuleiro.
   int _countPieces(int player) {
     int count = 0;
     for (var row in board) {
@@ -255,6 +272,8 @@ class _GameScreenState extends State<GameScreen> {
     return count;
   }
 
+  /// Verifica se algum jogador atingiu a condição de vitória (oponente com
+  /// 2 ou menos peças) e exibe o diálogo de fim de jogo quando necessário.
   void _checkWinCondition() {
     if (phase != GamePhase.movement && phase != GamePhase.capture) return;
 
@@ -277,6 +296,10 @@ class _GameScreenState extends State<GameScreen> {
   // INTERAÇÕES DO JOGADOR
   // ============================================================
 
+  /// Trata o toque do jogador em uma célula do tabuleiro.
+  /// O comportamento varia conforme a fase atual: colocação, movimento ou
+  /// captura. Valida a jogada, atualiza o estado local e envia a mensagem
+  /// correspondente ao oponente via socket.
   void _onCellTap(int row, int col) {
     if (phase == GamePhase.gameOver) return;
 
@@ -410,6 +433,8 @@ class _GameScreenState extends State<GameScreen> {
   // CHAT E DESISTÊNCIA
   // ============================================================
 
+  /// Envia a mensagem digitada no campo de chat ao oponente via socket
+  /// e a adiciona à lista local de mensagens.
   void _sendChat() {
     String text = _chatController.text.trim();
     if (text.isEmpty) return;
@@ -424,6 +449,8 @@ class _GameScreenState extends State<GameScreen> {
     _scrollChatToBottom();
   }
 
+  /// Exibe um diálogo de confirmação de desistência. Se confirmado, envia
+  /// a mensagem de rendição ao oponente e encerra a partida localmente.
   void _surrender() {
     showDialog(
       context: context,
@@ -460,6 +487,9 @@ class _GameScreenState extends State<GameScreen> {
   // DIÁLOGO DE FIM DE JOGO E REVANCHE
   // ============================================================
 
+  /// Exibe o diálogo de fim de jogo com o resultado da partida.
+  /// Gerencia o fluxo de revanche: ambos os jogadores precisam confirmar
+  /// para que uma nova partida seja iniciada.
   void _showGameOverDialog(bool isWinner, String message) {
     _iWantRematch = false;
     _opponentWantsRematch = false;
@@ -548,6 +578,8 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
+  /// Encerra a conexão socket, fecha o ServerSocket (se for host) e
+  /// navega de volta à tela de conexão.
   void _backToMenu() {
     _dialogSetState = null;
     _socketService.dispose();
@@ -558,6 +590,8 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
+  /// Reinicia todos os dados da partida para uma nova rodada, mantendo a
+  /// mesma conexão socket. O jogador 1 (host) sempre começa a revanche.
   void _startRematch() {
     _dialogSetState = null;
     // Fecha o diálogo se ainda estiver aberto
@@ -582,6 +616,8 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
+  /// Rola a lista do chat até a mensagem mais recente após um pequeno atraso
+  /// para garantir que o widget já foi renderizado.
   void _scrollChatToBottom() {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_chatScrollController.hasClients) {
@@ -662,6 +698,8 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
+  /// Libera todos os recursos ao sair da tela: fecha o socket, o ServerSocket
+  /// (se host) e os controllers de texto e scroll.
   @override
   void dispose() {
     _socketService.dispose();
